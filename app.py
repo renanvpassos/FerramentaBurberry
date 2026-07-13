@@ -37,7 +37,7 @@ def tratar_planilha(file, numero_fatura):
         raise ValueError(f"Cabeçalhos faltando: {', '.join(colunas_faltantes)}")
 
     # Estrutura Final (Adicionado CFOP)
-    colunas_finais = ['PARTNUMBER', 'QUANTIDADE', 'UNIDADE', 'PRECOTOTAL', 'PESOTOTAL', 'INCOTERMS', 'MOEDA', 'FATURA', 'CFOP']
+    colunas_finais = ['PARTNUMBER', 'QUANTIDADE', 'UNIDADE', 'PRECOTOTAL', 'PESOTOTAL', 'INCOTERMS', 'MOEDA', 'FATURA', 'CFOP', 'PEDIDO']
     df_final = pd.DataFrame(columns=colunas_finais)
 
     df_final['PARTNUMBER'] = df_origem[C_PARTNUMBER]
@@ -65,6 +65,8 @@ def tratar_planilha(file, numero_fatura):
     
     # Atribuição da coluna CFOP
     df_final['CFOP'] = df_origem[C_CFOP]
+
+    df_final['PEDIDO'] = df_origem[C_ORDEM_COMPRA].apply(limpar_numero)
 
     return df_final
 
