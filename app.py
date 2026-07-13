@@ -97,28 +97,24 @@ def tratar_planilha(file, incoterm_valor):
 # --- CONFIGURAÇÃO DA INTERFACE WEB (STREAMLIT) ---
 st.set_page_config(page_title="Tratador de Planilhas", layout="centered")
 st.title("📂 Tratamento planilha Chanel")
-st.markdown("Insira os dados abaixo para gerar a nova planilha tratada.")
+st.markdown("O sistema está configurado para utilizar o INCOTERM **FCA** automaticamente.")
 
 uploaded_file = st.file_uploader("Selecione o arquivo Excel de origem (.xlsx)", type=["xlsx"])
 
-# Adicione esta linha para criar a variável que está faltando:
-incoterm_input = st.text_input("Digite o INCOTERM (ex: FCA, FOB):")
-
-# Agora o 'if' abaixo funcionará, pois incoterm_input já existe
-if uploaded_file and incoterm_input:
+# Verificamos apenas se o arquivo foi enviado
+if uploaded_file:
     if st.button("Processar Planilha", use_container_width=True):
         try:
-            with st.spinner("Processando dados pelos cabeçalhos..."):
-                # Passando o valor capturado pelo input para a função
-                resultado = tratar_planilha(uploaded_file, incoterm_input)
+            with st.spinner("Processando dados..."):
+                # Passamos "FCA" fixo diretamente para a função
+                resultado = tratar_planilha(uploaded_file, "FCA")
+                
                 output = io.BytesIO()
-
                 with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                     resultado.to_excel(writer, index=False, sheet_name='Planilha Tratada')
                     workbook = writer.book
                     worksheet = writer.sheets['Planilha Tratada']
 
-                    # Força a formatação de texto puro do Excel nas colunas I, J e K (índices 8, 9, 10)
                     fmt_txt = workbook.add_format({'num_format': '@'})
                     worksheet.set_column(8, 10, None, fmt_txt)
 
