@@ -1,13 +1,27 @@
 import streamlit as st
 import pandas as pd
 import io
+import re
+
+def limpar_numero(valor):
+    """Remove caracteres não numéricos e converte para float."""
+    if pd.isna(valor) or valor == "": 
+        return 0.0
+    valor_str = str(valor)
+    # Remove tudo que não seja dígito, ponto ou vírgula
+    # Substitui vírgula por ponto para conversão decimal correta
+    valor_limpo = re.sub(r'[^\d,.]', '', valor_str).replace(',', '.')
+    try:
+        return float(valor_limpo)
+    except ValueError:
+        return 0.0
 
 def tratar_planilha(file, numero_fatura):
     # Carrega a planilha de origem
     df_origem = pd.read_excel(file, header=0)
     df_origem.columns = [str(col).strip() for col in df_origem.columns]
 
-    # Dicionário de mapeamento
+    # --- DICIONÁRIO DE MAPEAMENTO ---
     C_PARTNUMBER = "CODIGO PRINCIPAL"
     C_QUANTIDADE = "QUANTIDADE"
     C_DESCRICAO = "DESCRICAO PORTUGUES"
@@ -19,16 +33,19 @@ def tratar_planilha(file, numero_fatura):
 
     colunas_obrigatorias = [C_PARTNUMBER, C_QUANTIDADE, C_DESCRICAO, C_PRECO_UNIT, C_PESO_UNIT, C_FATURA, C_ORDEM_COMPRA, C_CFOP]
 
+    # Verifica colunas
     colunas_faltantes = [col for col in colunas_obrigatorias if col not in df_origem.columns]
     if colunas_faltantes:
         raise ValueError(f"Cabeçalhos faltando: {', '.join(colunas_faltantes)}")
 
+    # Estrutura Final
     colunas_finais = ['PARTNUMBER', 'QUANTIDADE', 'UNIDADE', 'PRECOTOTAL', 'PESOTOTAL', 'INCOTERMS', 'MOEDA', 'FATURA']
     df_final = pd.DataFrame(columns=colunas_finais)
 
     df_final['PARTNUMBER'] = df_origem[C_PARTNUMBER]
     df_final['QUANTIDADE'] = df_origem[C_QUANTIDADE]
 
+    # Lógica de Unidade
     def verificar_unidade(valor):
         valor_str = str(valor).upper()
         palavras_pares = ["TENIS", "TÊNIS", "SAPATO", "MOCASSIM", "SANDALIA"]
@@ -36,28 +53,24 @@ def tratar_planilha(file, numero_fatura):
 
     df_final['UNIDADE'] = df_origem[C_DESCRICAO].apply(verificar_unidade)
 
-    qtd_num = pd.to_numeric(df_origem[C_QUANTIDADE], errors='coerce').fillna(0)
-    preco_num = pd.to_numeric(df_origem[C_PRECO_UNIT], errors='coerce').fillna(0)
-    peso_num = pd.to_numeric(df_origem[C_PESO_UNIT], errors='coerce').fillna(0)
+    # Aplicação da limpeza e cálculo
+    qtd_num = df_origem[C_QUANTIDADE].apply(limpar_numero)
+    preco_num = df_origem[C_PRECO_UNIT].apply(limpar_numero)
+    peso_num = df_origem[C_PESO_UNIT].apply(limpar_numero)
 
     df_final['PRECOTOTAL'] = preco_num * qtd_num
-    
-    # E: PESOTOTAL -> Ajustado: sem divisão por 1000
-    df_final['PESOTOTAL'] = peso_num * qtd_num
+    df_final['PESOTOTAL'] = peso_num * qtd_num  # Sem divisão por 1000 conforme solicitado
 
     df_final['INCOTERMS'] = 'FCA'
     df_final['MOEDA'] = '790'
-    
-    # H: FATURA -> Preenche com o valor inserido na interface
     df_final['FATURA'] = numero_fatura
 
     return df_final
 
-# --- CONFIGURAÇÃO DA INTERFACE (STREAMLIT) ---
+# --- INTERFACE (STREAMLIT) ---
 st.set_page_config(page_title="Tratador de Planilhas", layout="centered")
 st.title("📂 Tratamento planilha Chanel")
 
-# Nova entrada para o número da fatura
 fatura_input = st.text_input("Número da Fatura (será aplicado a todas as linhas):", placeholder="Ex: FAT12345")
 uploaded_file = st.file_uploader("Selecione o arquivo Excel de origem (.xlsx)", type=["xlsx"])
 
