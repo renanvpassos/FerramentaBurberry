@@ -8,8 +8,6 @@ def limpar_numero(valor):
     if pd.isna(valor) or valor == "": 
         return 0.0
     valor_str = str(valor)
-    # Remove tudo que não seja dígito, ponto ou vírgula
-    # Substitui vírgula por ponto para conversão decimal correta
     valor_limpo = re.sub(r'[^\d,.]', '', valor_str).replace(',', '.')
     try:
         return float(valor_limpo)
@@ -38,8 +36,8 @@ def tratar_planilha(file, numero_fatura):
     if colunas_faltantes:
         raise ValueError(f"Cabeçalhos faltando: {', '.join(colunas_faltantes)}")
 
-    # Estrutura Final
-    colunas_finais = ['PARTNUMBER', 'QUANTIDADE', 'UNIDADE', 'PRECOTOTAL', 'PESOTOTAL', 'INCOTERMS', 'MOEDA', 'FATURA']
+    # Estrutura Final (Adicionado CFOP)
+    colunas_finais = ['PARTNUMBER', 'QUANTIDADE', 'UNIDADE', 'PRECOTOTAL', 'PESOTOTAL', 'INCOTERMS', 'MOEDA', 'FATURA', 'CFOP']
     df_final = pd.DataFrame(columns=colunas_finais)
 
     df_final['PARTNUMBER'] = df_origem[C_PARTNUMBER]
@@ -59,11 +57,14 @@ def tratar_planilha(file, numero_fatura):
     peso_num = df_origem[C_PESO_UNIT].apply(limpar_numero)
 
     df_final['PRECOTOTAL'] = preco_num * qtd_num
-    df_final['PESOTOTAL'] = peso_num * qtd_num  # Sem divisão por 1000 conforme solicitado
+    df_final['PESOTOTAL'] = peso_num * qtd_num 
 
     df_final['INCOTERMS'] = 'FCA'
     df_final['MOEDA'] = '790'
     df_final['FATURA'] = numero_fatura
+    
+    # Atribuição da coluna CFOP
+    df_final['CFOP'] = df_origem[C_CFOP]
 
     return df_final
 
