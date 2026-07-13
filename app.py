@@ -12,7 +12,7 @@ def tratar_planilha(file, incoterm_valor):
     df_origem.columns = [str(col).strip() for col in df_origem.columns]
 
     # --- DICIONÁRIO DE MAPEAMENTO (Cabeçalhos da Planilha de Origem) ---
-    C_PARTNUMBER = "CÓDIGO PRINCIPAL"
+    C_PARTNUMBER = "CODIGO PRINCIPAL"
     C_QUANTIDADE = "QUANTIDADE"
     C_DESCRICAO = "DESCRICAO PORTUGUES"
     C_PRECO_UNIT = "VALOR UNITARIO ITEM"
