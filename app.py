@@ -83,18 +83,13 @@ def tratar_planilha(file, incoterm_valor):
     df_final['PESOTOTAL'] = (peso_num * qtd_num) / 1000
 
     # F: INCOTERMS ➔ Valor da interface
-    df_final['INCOTERMS'] = incoterm_valor
+    df_final['INCOTERMS'] = 'FCA'
 
     # G: MOEDA ➔ Sempre '790'
     df_final['MOEDA'] = '790'
 
     # H: FATURA ➔ "FATURA"
     df_final['FATURA'] = df_origem[C_FATURA]
-
-    # Aplicando a extração baseada na coluna "ORDEM DE COMPRA"
-    dados_extraidos = df_origem[C_ORDEM_COMPRA].apply(extrair_dados_regex)
-    df_final['nrlote'] = [d[0] for d in dados_extraidos]
-    df_final['expedicao'] = [d[1] for d in dados_extraidos]
 
     return df_final
 
@@ -104,7 +99,6 @@ st.set_page_config(page_title="Tratador de Planilhas", layout="centered")
 st.title("📂 Tratamento planilha Chanel")
 st.markdown("Insira os dados abaixo para gerar a nova planilha tratada.")
 
-incoterm_input = st.text_input("Informe o INCOTERMS:", placeholder="Ex: FOB, CIF, EXW...")
 uploaded_file = st.file_uploader("Selecione o arquivo Excel de origem (.xlsx)", type=["xlsx"])
 
 if uploaded_file and incoterm_input:
