@@ -101,10 +101,15 @@ st.markdown("Insira os dados abaixo para gerar a nova planilha tratada.")
 
 uploaded_file = st.file_uploader("Selecione o arquivo Excel de origem (.xlsx)", type=["xlsx"])
 
+# Adicione esta linha para criar a variável que está faltando:
+incoterm_input = st.text_input("Digite o INCOTERM (ex: FCA, FOB):")
+
+# Agora o 'if' abaixo funcionará, pois incoterm_input já existe
 if uploaded_file and incoterm_input:
     if st.button("Processar Planilha", use_container_width=True):
         try:
             with st.spinner("Processando dados pelos cabeçalhos..."):
+                # Passando o valor capturado pelo input para a função
                 resultado = tratar_planilha(uploaded_file, incoterm_input)
                 output = io.BytesIO()
 
