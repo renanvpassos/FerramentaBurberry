@@ -3,6 +3,21 @@ import pandas as pd
 import io
 import re
 
+def extrair_dados_regex(texto):
+    # Converte para string e remove espaços em branco
+    texto = str(texto).strip()
+    
+    # EXEMPLO DE REGEX: Ajuste conforme o padrão real da sua "ORDEM DE COMPRA"
+    # Este exemplo assume que o lote e a expedição estão separados por um espaço ou hífen
+    # Exemplo: "LOTE123 EXP456"
+    padrao = r"(?P<lote>\w+)\s+(?P<expedicao>\w+)"
+    
+    match = re.search(padrao, texto)
+    if match:
+        return match.group("lote"), match.group("expedicao")
+    else:
+        # Retorna valores padrão caso não encontre o padrão (evita erro)
+        return "N/A", "N/A"
 
 def tratar_planilha(file, incoterm_valor):
     # Carrega a planilha de origem mantendo a primeira linha como cabeçalho (header=0)
