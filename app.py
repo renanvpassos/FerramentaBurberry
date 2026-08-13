@@ -72,7 +72,7 @@ def tratar_planilha(file, numero_fatura):
 
 # --- INTERFACE (STREAMLIT) ---
 st.set_page_config(page_title="Tratador de Planilhas", layout="centered")
-st.title("📂 Tratamento planilha Bry")
+st.title("📂 Tratamento planilha BRY")
 
 fatura_input = st.text_input("Número da Fatura (será aplicado a todas as linhas):", placeholder="Ex: FAT12345")
 uploaded_file = st.file_uploader("Selecione o arquivo Excel de origem (.xlsx)", type=["xlsx"])
